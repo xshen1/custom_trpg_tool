@@ -29,13 +29,13 @@ class Skills:
 
 
 class Card:
-    def __init__(self, name, stat):
+    def __init__(self, name, stat, hp_ratio=3):
         self.name = name
         self.base_stat = stat
         self.temp_stat = {"耐力": 0, "敏捷": 0, "力量": 0, "智力": 0}
         self.stat = self.base_stat
         # 属性包括(耐力,敏捷,力量,智力)
-        self.hp_ratio = 3
+        self.hp_ratio = hp_ratio
         self.skills = {"属性检测": Skills("属性", 0, "属性")}
         # 生存技能为(名字，数值，类型)
 
