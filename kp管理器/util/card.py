@@ -36,9 +36,15 @@ class Card:
         self.stat = self.base_stat
         # 属性包括(耐力,敏捷,力量,智力)
         self.hp_ratio = 3
-        self.hp = self.stat["耐力"]*self.hp_ratio
         self.skills = {"属性检测": Skills("属性", 0, "属性")}
         # 生存技能为(名字，数值，类型)
+
+    def set_health(self):
+        self.max_health = self.stat["耐力"]*self.hp_ratio
+        self.hp = self.max_health
+
+    def change_health(self, change_amount):
+        self.hp += change_amount
 
     def modify_stat(self, base_stat_change=None, temp_stat_change=None):
         if base_stat_change:
@@ -47,6 +53,7 @@ class Card:
         if temp_stat_change:
             for key in temp_stat_change.keys():
                 self.temp_stat[key] += temp_stat_change[key]
+        self.set_health()
         return self.get_current_stat()
 
     def get_current_stat(self):
@@ -88,3 +95,6 @@ if __name__ == '__main__':
     test_skills = test_card.change_skills("攀爬", 30, "探索")
     print("创建技能 攀爬 30 探索")
     print("测试技能", test_card.skill_check("攀爬", "敏捷", 1))
+    test_card.hp_ratio = 5
+    test_card.set_health()
+    print("hp", test_card.hp)
