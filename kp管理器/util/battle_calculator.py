@@ -103,6 +103,13 @@ class battle_calculator:
         self.card_full.pop(sorted_name[0])
         name = sorted_name[0]
         self.init_round[name] -= self.init_cap
+        init_acmount, init_round = self.character_list[name].temp_init_change
+        if init_round > 1:
+            self.modify_temp_initiative(
+                name, init_status_effect=(init_acmount, init_round-1))
+        elif init_round == 1:
+            self.modify_temp_initiative(
+                name, init_status_effect=(0, 0))
         self.logs.append(name+"的回合.获得一点策略点")
         self.logs.append(str(self.display_battle_status()))
         return name
@@ -155,6 +162,14 @@ if __name__ == '__main__':
     print("轮盘上限:", battle_ground.init_cap)
     battle_ground.next_charge()
     battle_ground.display_log()
+    battle_ground.set_temp_status("测试3", dex=0)
     battle_ground.modify_temp_initiative("测试2", init_charge=100)
+    battle_ground.next_charge()
+    battle_ground.display_log()
+    battle_ground.modify_temp_initiative("测试1", init_status_effect=(100, 2))
+    battle_ground.next_charge()
+    battle_ground.display_log()
+    battle_ground.next_charge()
+    battle_ground.display_log()
     battle_ground.next_charge()
     battle_ground.display_log()
