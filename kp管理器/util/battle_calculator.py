@@ -1,6 +1,5 @@
 from itertools import count
 import random
-from tkinter import N
 from card import Card
 import math
 
@@ -61,7 +60,9 @@ class battle_calculator:
         for name, card in self.character_list.items():
             self.init_round[name] = card.initiative_check()
         max_init = max(self.init_round.values())
-        self.init_cap = math.ceil(max_init/10)*10
+        digits = len(str(max_init))
+        digits = 10**digits if digits else 10
+        self.init_cap = math.ceil(max_init/digits)*digits
         if max_init == self.init_cap:
             for name, init in self.init_round.items():
                 if init >= max_init:
@@ -77,23 +78,29 @@ class battle_calculator:
         if init_charge:
             self.init_round[name] += init_charge
             if self.init_round[name] >= self.init_cap:
-                self.fullname[name] = self.init_round[name] * \
+                self.card_full[name] = self.init_round[name] * \
                     self.init_cap + \
                     self.init_round[name]+random.uniform(1, 99)/100
         if init_status_effect:
             self.character_list[name].temp_init_change = init_status_effect
 
-    def set_temp_status(self, name, con=0, str=0, dex=0, wis=0):
+    def set_temp_status(self, name, con=0, strength=0, dex=0, wis=0):
         # init_charge 是一次性充能,请输入 int
         # init_status_effect 是多回合的额外充能，请输入(数值,回合数)
-        return self.character_list[name].modify_temp_stat(
-            {"耐力": con, "敏捷": dex, "力量": str, "智力": wis})
+        stat = self.character_list[name].modify_temp_stat(
+            {"耐力": con, "敏捷": dex, "力量": strength, "智力": wis})
+        current_init = self.character_list[name].initiative_check()
+        if current_init > self.init_cap:
+            digits = len(str(current_init))-1
+            digits = 10**digits if digits else 10
+            self.init_cap = math.ceil(current_init/digits)*digits
+        return stat
 
     def determine_next_card(self):
         # 检测谁动
         self.logs.append(str(self.display_battle_status()))
         sorted_name = sorted(self.card_full, reverse=True)
-        move_card = self.card_full.pop(sorted_name[0])
+        self.card_full.pop(sorted_name[0])
         name = sorted_name[0]
         self.init_round[name] -= self.init_cap
         self.logs.append(name+"的回合.获得一点策略点")
@@ -142,40 +149,12 @@ if __name__ == '__main__':
     print("轮盘上限:", battle_ground.init_cap)
     battle_ground.next_charge()
     battle_ground.display_log()
-    test_card3.change_health(-10)
-    print("-----------------")
-    print("模拟扣血", battle_ground.display_battle_status())
-    battle_ground.next_charge()
-    battle_ground.display_log()
-    battle_ground.next_charge()
-    battle_ground.display_log()
-    battle_ground.next_charge()
-    battle_ground.display_log()
-    print("-----------------")
-    cur_status = battle_ground.reset_status()
-    print("重置战场", cur_status)
-    battle_ground.remove_card("测试1")
-    battle_ground.remove_card("测试2")
-    battle_ground.remove_card("测试3")
-    print("移除卡牌", battle_ground.reset_status())
-    stat1 = {"耐力": 4, "敏捷": 30, "力量": 4, "智力": 30}
-    stat2 = {"耐力": 5, "敏捷": 1, "力量": 4, "智力": 1}
-    test_card1 = Card("测试1", stat1)
-    test_card2 = Card("测试2", stat1)
-    test_card3 = Card("测试3", stat2)
-    battle_ground = battle_calculator()
-    battle_ground.add_card("测试1", test_card1)
-    battle_ground.add_card("测试2", test_card2)
-    battle_ground.add_card("测试3", test_card3)
-    print("\n-----------------")
-    print("测试获取战场信息", battle_ground.display_battle_status())
-    print("开始战斗")
-    status = battle_ground.start_battle()
-    print("现在情况:", status)
+    battle_ground.set_temp_status("测试3", dex=100)
+    print("测试3:", battle_ground.character_list["测试3"].get_current_stat())
+    print("测试3:", battle_ground.character_list["测试3"].initiative_check())
     print("轮盘上限:", battle_ground.init_cap)
     battle_ground.next_charge()
     battle_ground.display_log()
-    battle_ground.next_charge()
-    battle_ground.display_log()
+    battle_ground.modify_temp_initiative("测试2", init_charge=100)
     battle_ground.next_charge()
     battle_ground.display_log()

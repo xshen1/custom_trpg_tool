@@ -1,3 +1,9 @@
+from copy import copy
+
+
+import copy
+
+
 class Skills:
     def __init__(self, name, points, type):
         self.name = name
@@ -33,11 +39,11 @@ class Card:
         self.name = name
         self.base_stat = stat
         self.temp_stat = {"耐力": 0, "敏捷": 0, "力量": 0, "智力": 0}
-        self.stat = self.base_stat
+        self.stat = copy.deepcopy(self.base_stat)
         # 属性包括(耐力,敏捷,力量,智力)
         self.hp_ratio = hp_ratio
-        self.initiative = self.initiative_check()
         self.temp_init_change = (0, 0)
+        self.initiative = self.initiative_check()
         self.skills = {"属性检测": Skills("属性", 0, "属性")}
         # 生存技能为(名字，数值，类型)
 
@@ -50,11 +56,10 @@ class Card:
         # 改变现在生命值
         self.hp += change_amount
 
-    def modify_stat(self, base_stat_change=None):
-        # 改变基础属性以及临时属性
-        if base_stat_change:
-            for key in base_stat_change.keys():
-                self.base_stat[key] += base_stat_change[key]
+    def modify_stat(self, base_stat_change):
+        # 改变基础属性
+        for key in base_stat_change.keys():
+            self.base_stat[key] += base_stat_change[key]
         self.set_health()
         return self.get_current_stat()
 
@@ -70,7 +75,8 @@ class Card:
         return self.stat
 
     def initiative_check(self):
-        return (self.stat["智力"]+self.stat["敏捷"])//2 + self.temp_init_change
+        change, round = self.temp_init_change
+        return (self.stat["智力"]+self.stat["敏捷"])//2 + change
 
     def change_skills(self, skill_name, points, type):
         if skill_name in self.skills:
